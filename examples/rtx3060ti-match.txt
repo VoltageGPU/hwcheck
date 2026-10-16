@@ -1,0 +1,21 @@
+hwcheck real run, 2026-10-16T06:43Z
+machine: a workstation with an NVIDIA GeForce RTX 3060 Ti (WSL2 Ubuntu), not a rented pod
+listing given: RTX 3060 Ti, 1 GPU, 8 GB
+command: curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --gpu "RTX 3060 Ti" --gpus 1 --vram 8 --no-net
+hwcheck.sh sha256 (first 16 hex): a8120ccf8b1a3303
+
+VoltageGPU hardware check (read-only, nothing about this machine is sent anywhere)
+  2026-10-16 06:42 UTC · DESKTOP-B409897
+
+                 LISTED                   MEASURED                           
+  GPU model      RTX 3060 Ti              NVIDIA GeForce RTX 3060 Ti         OK
+  GPU count      1                        1                                  OK
+  VRAM per GPU   8 GB                     8 GB                               OK
+  Driver / CUDA                           610.88 / ?                         OK
+  CUDA compute                            not tested (no PyTorch)            info
+  CPU                                     12 threads                         info
+  RAM            -                        16 GB                              info
+  Disk (/)       -                        1007 GB, 937 GB free               info
+
+RESULT: MATCHES THE LISTING
+exit code: 0

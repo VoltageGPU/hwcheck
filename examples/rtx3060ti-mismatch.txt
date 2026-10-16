@@ -1,0 +1,22 @@
+hwcheck real run, 2026-10-16T06:43Z
+machine: a workstation with an NVIDIA GeForce RTX 3060 Ti (WSL2 Ubuntu), not a rented pod
+listing given: RTX 4090, 1 GPU, 24 GB (deliberately wrong listing)
+command: curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --gpu "RTX 4090" --gpus 1 --vram 24 --no-net
+hwcheck.sh sha256 (first 16 hex): a8120ccf8b1a3303
+
+VoltageGPU hardware check (read-only, nothing about this machine is sent anywhere)
+  2026-10-16 06:42 UTC · DESKTOP-B409897
+
+                 LISTED                   MEASURED                           
+  GPU model      RTX 4090                 NVIDIA GeForce RTX 3060 Ti         DOES NOT MATCH
+  GPU count      1                        1                                  OK
+  VRAM per GPU   24 GB                    8 GB                               DOES NOT MATCH
+  Driver / CUDA                           610.88 / ?                         OK
+  CUDA compute                            not tested (no PyTorch)            info
+  CPU                                     12 threads                         info
+  RAM            -                        16 GB                              info
+  Disk (/)       -                        1007 GB, 937 GB free               info
+
+RESULT: DOES NOT MATCH THE LISTING (GPU model, VRAM)
+Release the pod from your dashboard and write to contact@voltagegpu.com with this output.
+exit code: 2
