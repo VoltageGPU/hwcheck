@@ -1,0 +1,20 @@
+VoltageGPU hwcheck proof
+date: 2026-10-16T14:53:26.824Z
+machine: c71fc019-f041-40e4-acf4-af9b5d41785d (standard tier, rented directly from our standard provider: the machines our listing shows)
+listing: 1x RTX 4090
+command: curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --gpu "RTX 4090" --gpus 1 --no-net
+exit code: 0 (0 = matches the listing, 2 = does not)
+VoltageGPU hardware check (read-only, nothing about this machine is sent anywhere)
+  2026-10-16 14:53 UTC · 70e81439dc90
+
+                 LISTED                   MEASURED                           
+  GPU model      RTX 4090                 NVIDIA GeForce RTX 4090            OK
+  GPU count      1                        1                                  OK
+  VRAM per GPU   -                        24 GB                              info
+  Driver / CUDA                           595.99.02 / 13.2                   OK
+  CUDA compute                            matmul on 1/1 GPU                  OK
+  CPU                                     28 threads                         info
+  RAM            -                        89 GB (container limit)            info
+  Disk (/)       -                        1673 GB, 1521 GB free              info
+
+RESULT: MATCHES THE LISTING

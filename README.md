@@ -34,6 +34,15 @@ Two real runs on the same workstation (an NVIDIA GeForce RTX 3060 Ti), in [`exam
 
 That second case is the classic one: a cheaper card sold under a bigger name.
 
+Four real runs on rented machines (16 October 2026), one per model, each run over SSH exactly as a customer would right after launch, all `RESULT: MATCHES THE LISTING`, exit 0:
+
+- [`rtx-4090.txt`](examples/rtx-4090.txt): 1x RTX 4090, 24 GB.
+- [`rtx-5090.txt`](examples/rtx-5090.txt): 1x RTX 5090, 32 GB.
+- [`h200.txt`](examples/h200.txt): 1x H200, the driver reports 140 GB.
+- [`b300.txt`](examples/b300.txt): 1x B300, the driver reports 269 GB.
+
+Memory is shown as the driver reports it, which can differ from the round figure on a spec sheet.
+
 ## What it does not prove
 
 It catches mislabeled machines, wrong counts and undersized nodes — what actually goes wrong in practice. It does **not** defend against a host determined to lie: whoever controls the machine can, in principle, make the driver report another name. Proof against the operator itself needs hardware attestation (Intel TDX + NVIDIA attestation); that is a different tool: [voltage-verify](https://github.com/Jabsama/voltage-verify).

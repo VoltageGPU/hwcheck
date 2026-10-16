@@ -1,0 +1,20 @@
+VoltageGPU hwcheck proof
+date: 2026-10-16T14:55:05.063Z
+machine: 4b2b0410-ca94-4119-b4d0-d2722b98f3b0 (standard tier, rented directly from our standard provider: the machines our listing shows)
+listing: 1x H200
+command: curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --gpu "H200" --gpus 1 --no-net
+exit code: 0 (0 = matches the listing, 2 = does not)
+VoltageGPU hardware check (read-only, nothing about this machine is sent anywhere)
+  2026-10-16 14:55 UTC · 90bb4dc861b0
+
+                 LISTED                   MEASURED                           
+  GPU model      H200                     NVIDIA H200                        OK
+  GPU count      1                        1                                  OK
+  VRAM per GPU   -                        140 GB                             info
+  Driver / CUDA                           580.178.04 / 13.0                  OK
+  CUDA compute                            matmul on 1/1 GPU                  OK
+  CPU                                     44 threads                         info
+  RAM            -                        163 GB (container limit)           info
+  Disk (/)       -                        484 GB, 387 GB free                info
+
+RESULT: MATCHES THE LISTING

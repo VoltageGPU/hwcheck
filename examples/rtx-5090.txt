@@ -1,0 +1,20 @@
+VoltageGPU hwcheck proof
+date: 2026-10-16T14:54:10.087Z
+machine: fb2d3138-6a12-4372-acaf-f77c0eb3a1a9 (standard tier, rented directly from our standard provider: the machines our listing shows)
+listing: 1x RTX 5090
+command: curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --gpu "RTX 5090" --gpus 1 --no-net
+exit code: 0 (0 = matches the listing, 2 = does not)
+VoltageGPU hardware check (read-only, nothing about this machine is sent anywhere)
+  2026-10-16 14:54 UTC · a64108b0cfc1
+
+                 LISTED                   MEASURED                           
+  GPU model      RTX 5090                 NVIDIA GeForce RTX 5090            OK
+  GPU count      1                        1                                  OK
+  VRAM per GPU   -                        32 GB                              info
+  Driver / CUDA                           595.99.02 / 13.2                   OK
+  CUDA compute                            matmul on 1/1 GPU                  OK
+  CPU                                     16 threads                         info
+  RAM            -                        26 GB (container limit)            info
+  Disk (/)       -                        914 GB, 819 GB free                info
+
+RESULT: MATCHES THE LISTING
