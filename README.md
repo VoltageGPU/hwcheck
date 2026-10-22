@@ -45,7 +45,7 @@ Memory is shown as the driver reports it, which can differ from the round figure
 
 ## What it does not prove
 
-It catches mislabeled machines, wrong counts and undersized nodes — what actually goes wrong in practice. It does **not** defend against a host determined to lie: whoever controls the machine can, in principle, make the driver report another name. Proof against the operator itself needs hardware attestation (Intel TDX + NVIDIA attestation); that is a different tool: [voltage-verify](https://github.com/Jabsama/voltage-verify).
+It catches mislabeled machines, wrong counts and undersized nodes — what actually goes wrong in practice. It does **not** defend against a host determined to lie: whoever controls the machine can, in principle, make the driver report another name. Proof against the operator itself needs hardware attestation (Intel TDX + NVIDIA attestation); that is a different tool: [voltage-verify](https://github.com/VoltageGPU/voltage-verify).
 
 ## Options
 
