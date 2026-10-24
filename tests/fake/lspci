@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Fake lspci for tests/run.sh: $FAKE_DIR/lspci.txt (lspci -nn lines), nothing without it.
+f=${FAKE_DIR:?}/lspci.txt
+[ -f "$f" ] && cat "$f"
+exit 0

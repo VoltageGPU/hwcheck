@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Fake python3 for tests/run.sh: answers acceptance.sh's PyTorch scripts with $FAKE_DIR/py/*.out
+# (no file = no PyTorch). While a script "runs", $FAKE_STATE/busy.<pid> tells the fake
+# nvidia-smi to report the GPUs under load. Anything else goes to the real python3.
+py=${FAKE_DIR:?}/py
+busy() { : > "$FAKE_STATE/busy.$$"; sleep "$1"; rm -f "$FAKE_STATE/busy.$$"; }
+# FAKE_CUDA_FAIL=<message>: the P2P and NCCL scripts fail with that CUDA error.
+cuda_fail() { [ -n "${FAKE_CUDA_FAIL:-}" ] && { echo "RuntimeError: $FAKE_CUDA_FAIL" >&2; exit 1; }; }
+case "${1##*/}" in
+  probe.py) [ -f "$py/probe.out" ] || { echo "ModuleNotFoundError: No module named 'torch'" >&2; exit 1; }; cat "$py/probe.out" ;;
+  p2p.py) cuda_fail; busy 2; cat "$py/p2p.out" ;;
+  nccl.py) cuda_fail; busy 2; cat "$py/nccl.out" ;;
+  burn.py)
+    busy "${2:-10}"
+    f="$py/burn-$CUDA_VISIBLE_DEVICES.out"; [ -f "$f" ] || f="$py/burn.out"
+    cat "$f" ;;
+  *) exec /usr/bin/python3 "$@" ;;
+esac

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Fake nvidia-smi for tests/run.sh: replays the outputs of $FAKE_DIR (tests/fixtures/README.md).
+# --query-gpu reads gpus.csv (one column per field, nvidia-smi names); while a fake PyTorch
+# test runs ($FAKE_STATE/busy.*), the columns of gpus-load.csv replace them. A field missing
+# from help-query-gpu.txt fails the whole query, as with the real tool.
+d=${FAKE_DIR:?}
+if [ -n "${FAKE_NO_GPU:-}" ]; then
+  echo "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver. Make sure that the latest NVIDIA driver is installed and running."
+  exit 9
+fi
+case "${1:-}" in
+  "") cat "$d/header.txt" ;;
+  -L) cat "$d/L.txt" ;;
+  --help-query-gpu) cat "$d/../help-query-gpu.txt" ;;
+  topo) cat "$d/topo.txt" ;;
+  -q) [ -f "$d/q-ecc.txt" ] && cat "$d/q-ecc.txt" ;;
+  --query-compute-apps=*) [ -f "$d/apps.csv" ] && cat "$d/apps.csv" ;;
+  --query-gpu=*)
+    q=${1#--query-gpu=}
+    for f in ${q//,/ }; do
+      grep -q "\"$f\"" "$d/../help-query-gpu.txt" || { echo "Field \"$f\" is not a valid field to query."; echo; exit 2; }
+    done
+    over=/dev/null
+    if [ -f "$d/gpus-load.csv" ] && compgen -G "${FAKE_STATE:-/nonexistent}/busy.*" > /dev/null; then over="$d/gpus-load.csv"; fi
+    awk -F, -v q="$q" -v over="$over" '
+      BEGIN { n = split(q, want, ",") }
+      FNR == 1 { for (i = 1; i <= NF; i++) h[FILENAME, $i] = i; next }
+      FILENAME == over { for (i = 1; i <= NF; i++) o[FNR, i] = $i; next }
+      {
+        line = ""
+        for (k = 1; k <= n; k++) {
+          f = want[k]
+          if ((over, f) in h) v = o[FNR, h[over, f]]
+          else if ((FILENAME, f) in h) v = $(h[FILENAME, f])
+          else v = "[N/A]"
+          line = line (k > 1 ? ", " : "") v
+        }
+        print line
+      }' "$over" "$d/gpus.csv"
+    ;;
+  *) echo "fake nvidia-smi: unsupported arguments: $*" >&2; exit 2 ;;
+esac

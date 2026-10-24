@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Fake curl for tests/run.sh: "downloads" $FAKE_CURL_SRC into the file given with -o.
+out=""
+while [ $# -gt 0 ]; do
+  case "$1" in -o) out=$2; shift 2 ;; *) shift ;; esac
+done
+[ -n "$out" ] && [ -f "${FAKE_CURL_SRC:-}" ] || exit 22
+cp "$FAKE_CURL_SRC" "$out"

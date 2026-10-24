@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Fake dmesg for tests/run.sh: $FAKE_DIR/dmesg.txt, where @NOW@ becomes the current uptime (a
+# line printed "during the test"); without that file, the kernel log is not readable.
+f=${FAKE_DIR:?}/dmesg.txt
+if [ ! -f "$f" ]; then echo "dmesg: read kernel buffer failed: Operation not permitted" >&2; exit 1; fi
+now=$(awk '{ printf "%12.6f", $1 }' /proc/uptime)
+sed "s/@NOW@/$now/" "$f"

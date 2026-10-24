@@ -1,14 +1,40 @@
 #!/usr/bin/env bash
-# VoltageGPU hardware check, version 1 (2026-10-10).
+# VoltageGPU hardware check, version 1.1 (2026-10-24).
 # Read-only: compares this machine with what its listing says. Nothing about the
 # machine is sent anywhere; the speed test downloads 25 MB from
 # speed.cloudflare.com (skip it with --no-net). Exit code 0 = matches, 2 = does not.
+# --acceptance, as first option, runs acceptance.sh instead: a 10-minute test of a
+# multi-GPU machine before a long job (README.md).
 #
 #   curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --gpu "RTX 4090" --gpus 1 --vram 24 --ram 128 --disk 500
+#   curl -fsSL https://voltagegpu.com/hwcheck.sh | bash -s -- --acceptance [--quick]
 set -u
 
+# ── --acceptance: only the acceptance.sh whose SHA-256 is pinned here runs ──
+ACCEPTANCE_URL="https://voltagegpu.com/hwcheck-acceptance.sh"
+ACCEPTANCE_SHA256="ae76254f620b5a9d764e935933cdc216e7c4a2eabb1d2bfc34874a3aa412cfa7"
+if [ "${1:-}" = "--acceptance" ]; then
+  shift
+  sha() { sha256sum "$1" 2>/dev/null | awk '{ print $1 }'; }
+  # From a clone: the acceptance.sh next to this file. Piped: downloaded, then checked.
+  SELF="${BASH_SOURCE[0]:-}"
+  if [ -n "$SELF" ] && [ -f "$SELF" ] && [ "$(sha "$(dirname "$SELF")/acceptance.sh")" = "$ACCEPTANCE_SHA256" ]; then
+    exec bash "$(dirname "$SELF")/acceptance.sh" "$@" < /dev/null
+  fi
+  ACC=$(mktemp) || exit 70
+  trap 'rm -f "$ACC"' EXIT
+  if ! curl -fsSL --max-time 60 "$ACCEPTANCE_URL" -o "$ACC"; then echo "could not download $ACCEPTANCE_URL" >&2; exit 70; fi
+  if [ "$(sha "$ACC")" != "$ACCEPTANCE_SHA256" ]; then
+    echo "$ACCEPTANCE_URL does not match the SHA-256 pinned in this hwcheck.sh: not running it" >&2; exit 70
+  fi
+  bash "$ACC" "$@" < /dev/null; exit $?
+fi
+
 GPU=""; GPUS=""; VRAM=""; RAM=""; DISK=""; NET=1
-usage() { echo 'usage: hwcheck.sh --gpu "RTX 4090" --gpus 1 --vram 24 [--ram GB] [--disk GB] [--no-net]'; }
+usage() {
+  echo 'usage: hwcheck.sh --gpu "RTX 4090" --gpus 1 --vram 24 [--ram GB] [--disk GB] [--no-net]'
+  echo '       hwcheck.sh --acceptance [--quick] [--gpus 8] [--bare-metal]   (10-minute test, README.md)'
+}
 while [ $# -gt 0 ]; do
   case "$1" in
     --gpu) GPU="${2:-}"; shift 2 ;;
@@ -18,6 +44,7 @@ while [ $# -gt 0 ]; do
     --disk) DISK="${2:-}"; shift 2 ;;
     --no-net) NET=0; shift ;;
     -h|--help) usage; exit 0 ;;
+    --acceptance) echo "--acceptance must be the first option" >&2; usage >&2; exit 64 ;;
     *) echo "unknown option: $1" >&2; usage >&2; exit 64 ;;
   esac
 done

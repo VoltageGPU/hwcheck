@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Fake journalctl and sudo for tests/run.sh: always refused, so that only the fake dmesg counts.
+echo "${0##*/}: permission denied (fake)" >&2
+exit 1

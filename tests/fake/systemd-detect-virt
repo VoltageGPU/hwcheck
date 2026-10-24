@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Fake systemd-detect-virt for tests/run.sh: prints $FAKE_VIRT ("none" by default) and, like the
+# real one, exits 1 when there is no virtualization.
+echo "${FAKE_VIRT:-none}"
+[ "${FAKE_VIRT:-none}" != none ]

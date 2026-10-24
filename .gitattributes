@@ -1,0 +1,5 @@
+# Scripts run on Linux: LF in every checkout, even with core.autocrlf=true on Windows.
+*.sh text eol=lf
+tests/fake/* text eol=lf
+# Fixtures are raw nvidia-smi outputs (tabs, escape codes): their bytes stay as they are.
+tests/fixtures/** -text
