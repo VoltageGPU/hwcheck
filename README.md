@@ -43,6 +43,32 @@ Four real runs on rented machines (16 October 2026), one per model, each run ove
 
 Memory is shown as the driver reports it, which can differ from the round figure on a spec sheet.
 
+One real acceptance test (24 October 2026) on a production 8x H100 SXM bare metal node, driver 595.112.07 and Fabric Manager installed a few minutes earlier, run as the `ubuntu` user with `--gpus 8 --bare-metal`, 7 minutes including the PyTorch download, `RESULT: PASS`, exit 0: [`h100-8x-acceptance.txt`](examples/h100-8x-acceptance.txt) (the report, P2P matrix and per-GPU load table included) and [`h100-8x-acceptance.json`](examples/h100-8x-acceptance.json), byte for byte as the tool wrote them (SHA-256 `bb285156…` and `a656867b…`). The verdict lines:
+
+```
+  1 Topology  GPUs                PASS  8x NVIDIA H100 80GB HBM3
+              NVLink mesh         PASS  56/56 GPU pairs on NV18 (NV18 expected on H100 SXM)
+              NVSwitch            PASS  4 NVSwitch chips visible (4 on an 8-GPU H100 SXM board)
+              Fabric state        PASS  Completed / Success on 8/8 GPUs
+              PCIe links          PASS  Gen5 x16 on 8/8 GPUs under load, host-to-GPU copies 53.1 to 55.5 GB/s
+  2 P2P       CUDA init           PASS  8/8 GPUs in PyTorch 2.14.1+cu130 (installed for this run, cu130)
+              P2P copies          PASS  slowest pair 387 GB/s (GPU 0>2), median 389 GB/s (FAIL under 112, WARN under 270: H100 SXM line rate 450 GB/s)
+  3 NCCL      NCCL all-reduce     PASS  bus bandwidth 478.5 GB/s on 8 GPUs (4 GiB, NCCL 2.30.7); H100 SXM: about 370 GB/s in ring, about 480 with NVLink SHARP, PASS from 340
+  4 Load      Throughput          PASS  8/8 GPUs ran it, median 684 TFLOPS (bfloat16), slowest GPU 2 at 669
+              Thermal / power     PASS  max 69 C (GPU 2), no thermal or hardware slowdown; at the power cap in 95% of the samples (normal under full load)
+              Clocks              PASS  median SM clock 1368 MHz, every GPU between 1335 and 1380 MHz, at least 90% busy
+  5 Errors    ECC / memory        PASS  ECC on 8/8 GPUs, no uncorrected error, nothing pending, 0 corrected since the driver loaded
+              Kernel log (Xid)    PASS  no Xid during the test, read with journalctl
+  6 Hygiene   Previous tenant     PASS  nothing found in the home directories, /tmp, /var/tmp and /workspace; not readable: /root (run as root to include it)
+              SSH keys            PASS  1 key can log in (ubuntu: 1)
+              GPUs idle at start  PASS  no compute process, no GPU memory in use
+              Virtualization      PASS  none detected (systemd-detect-virt): bare metal, as listed
+
+RESULT: PASS
+```
+
+That run was made with the thresholds of the time ("WARN under 270" above); the P2P thresholds were raised after it, from its own measurements (see [Where the reference values come from](#where-the-reference-values-come-from)): with the current ones the same node still passes every line.
+
 ## What it does not prove
 
 It catches mislabeled machines, wrong counts and undersized nodes — what actually goes wrong in practice. It does **not** defend against a host determined to lie: whoever controls the machine can, in principle, make the driver report another name. Proof against the operator itself needs hardware attestation (Intel TDX + NVIDIA attestation); that is a different tool: [voltage-verify](https://github.com/VoltageGPU/voltage-verify).
@@ -93,8 +119,8 @@ Each line reads PASS, WARN or FAIL; N/A when the measure does not apply (no NVLi
 | 1 | NVSwitch | `lspci -nn`, NVIDIA devices of class 0680 | PASS with 4 on H100 and H200 boards, 6 on A100 boards; WARN on another count; INFO in a VM that shows none (the host may keep them; the NVLink lines judge the fabric) |
 | 1 | Fabric state | `fabric.state`, `fabric.status` | WARN unless `Completed` / `Success` on every GPU that reports it |
 | 1 | PCIe links | `pcie.link.gen` and `pcie.link.width`, current against max, the best seen during the tests (an idle GPU drops to Gen1); host-to-GPU copies from pinned memory | FAIL if a GPU under load runs narrower than both ends allow (x8 in an x16 slot halves the bandwidth: usually a badly seated card or riser); WARN if its generation stays under the maximum under load, or its host-to-GPU copies are under 70% of the median GPU |
-| 2 | P2P copies | 256 MiB from every GPU to every other one, 20 times, bytes compared after; the matrix is printed | FAIL if bytes differ, if a pair lacks peer access on an NVLink mesh, or if a pair is under 25% of the model's NVLink line rate per direction (PCIe Gen5 x16 tops out at 64 GB/s, 14% of H100's 450: under 25%, the pair is not really on NVLink); WARN if the median pair is under 60% of the line rate (NVIDIA's NCCL team puts effective NVLink at about 80% of it), or a pair under 80% of the median. Models without a known line rate: the relative rules only |
-| 3 | NCCL all-reduce | `torch.distributed` with NCCL, one process per GPU, 4 GiB of float32 per GPU (1 GiB under 40 GB of memory), 20 iterations, values checked; bus bandwidth as nccl-tests computes it | H100 SXM and H200: PASS from 340 GB/s, FAIL under 185. A100 SXM: PASS from 210, FAIL under 115. WARN in between. Other NVLink models: INFO (no reference). PCIe machines: N/A |
+| 2 | P2P copies | 256 MiB from every GPU to every other one, 20 times, bytes compared after; the matrix is printed | FAIL if bytes differ, if a pair lacks peer access on an NVLink mesh, or if a pair is under 25% of the model's NVLink line rate per direction (PCIe Gen5 x16 tops out at 64 GB/s, 14% of H100's 450: under 25%, the pair is not really on NVLink); WARN if the median pair is under 75% of the line rate (measured: 86% on 8x H100 SXM, 2026-10-24), or a pair under 90% of the median (measured: the slowest pair at 99% of it). Models without a known line rate: the relative rules only |
+| 3 | NCCL all-reduce | `torch.distributed` with NCCL, one process per GPU, 4 GiB of float32 per GPU (1 GiB under 40 GB of memory), 20 iterations, values checked; bus bandwidth as nccl-tests computes it | H100 SXM and H200: PASS from 340 GB/s, FAIL under 185 (measured: 478.5 GB/s on 8x H100 SXM, 2026-10-24). A100 SXM: PASS from 210, FAIL under 115. WARN in between. Other NVLink models: INFO (no reference). PCIe machines: N/A |
 | 4 | Throughput | 5 minutes of bf16 8192x8192 matrix products on every GPU at once | FAIL if a GPU does not run, returns non-finite values, returns other bits for the same product (silent data corruption), or runs under half the median GPU; WARN under 85% of the median, or if a GPU computes another result than an identical GPU |
 | 4 | Thermal / power | `nvidia-smi` every 5 s: temperature, power, slowdown reasons (`clocks_event_reasons`) | FAIL if hardware thermal slowdown or power brake is active in 5% of the samples or more on a GPU; WARN on any thermal slowdown, hardware slowdown, a power limit set under the GPU's default, or a GPU 10 C hotter than the median GPU |
 | 4 | Clocks | the same samples: SM clock, utilisation | WARN if a GPU's median SM clock is under 85% of the median GPU, or a GPU is under 90% busy |
@@ -115,7 +141,9 @@ Reaching the power cap is not a warning: under a full matrix load an H100 runs a
 - NCCL all-reduce on 8 A100 SXM: about 230 GB/s at 8 GB, same source ([nccl-tests#149](https://github.com/NVIDIA/nccl-tests/issues/149)); PASS from 210, FAIL under 115.
 - Bus bandwidth: `busbw = algbw × 2(n−1)/n` for an all-reduce, as defined in [nccl-tests' PERFORMANCE.md](https://github.com/NVIDIA/nccl-tests/blob/master/doc/PERFORMANCE.md).
 
-These thresholds are provisional: they come from NVIDIA's figures, not yet from runs of this script on 8-GPU nodes. Real runs will be published in `examples/` with their date, and a threshold that changes will be noted in the [changelog](CHANGELOG.md). B200 and B300 have a line rate from the datasheet but no NCCL reference yet (INFO).
+- Measured on 8x H100 SXM, 2026-10-24 ([`examples/h100-8x-acceptance.txt`](examples/h100-8x-acceptance.txt), a production bare metal node, driver 595.112.07, PyTorch 2.14.1, NCCL 2.30.7): GPU pairs from 387 to 391 GB/s, median 389, that is 86% of the 450 GB/s line rate (NVIDIA's NCCL team puts effective NVLink at about 80% of it); NCCL bus bandwidth 478.5 GB/s, the NVLink SHARP figure above; 669 to 689 TFLOPS bf16 per GPU, at the power cap (up to 702 W) in 95% of the samples; SM clocks 1335 to 1380 MHz; hottest GPU 69 C for a median of 63.5 C; host-to-GPU copies 53.1 to 55.5 GB/s, Gen5 x16. From it, the P2P thresholds were raised: median pair WARN under 75% of the line rate (was 60%), one pair WARN under 90% of the median (was 80%). The NCCL PASS threshold stays at 340, so that a node without NVLink SHARP (about 370) passes.
+
+The H100 SXM thresholds come from that run; one node is one sample, and further runs will be added to `examples/` with their date, any threshold change noted in the [changelog](CHANGELOG.md). Still provisional, from NVIDIA's figures only: H200 (same NVLink and NVSwitch, hence the same values), A100 SXM, and B200 and B300, which have a line rate from the datasheet but no NCCL reference yet (INFO).
 
 ### What it shows, and what it does not
 

@@ -14,9 +14,12 @@ set -u
 VERSION="1.1"
 
 # ── Thresholds (README.md, "How each verdict is decided") ──────────────────
+# Measured on 8x H100 SXM, 2026-10-24 (examples/h100-8x-acceptance.txt): pairs 387 to 391 GB/s,
+# median 389 (86% of the 450 GB/s line rate), NCCL bus bandwidth 478.5 GB/s, 669 to 689 TFLOPS,
+# SM clock 1335 to 1380 MHz, hottest GPU 69 C for a median of 63.5, host-to-GPU 53.1 to 55.5 GB/s.
 P2P_FAIL=0.25     # a GPU pair under 25% of the NVLink line rate is not really on NVLink
-P2P_WARN=0.60     # median pair under 60% of the line rate (healthy nodes: about 80%)
-P2P_SPREAD=0.80   # one pair under 80% of the median pair
+P2P_WARN=0.75     # median pair under 75% of the line rate (measured: 86% on 8x H100 SXM, 2026-10-24)
+P2P_SPREAD=0.90   # one pair under 90% of the median pair (measured: slowest pair at 99% of it)
 H2D_SPREAD=0.70   # one GPU's host-to-GPU copies under 70% of the median GPU
 TFLOPS_FAIL=0.50  # one GPU under half the median matmul throughput
 TFLOPS_WARN=0.85  # ... or under 85% of it
@@ -35,7 +38,7 @@ profile() {
   case "$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')" in
     *pcie*|*nvl*|*gh200*|*gb200*|*gb300*) ;;
     *h100*hbm3*|*h100*sxm*) P_LABEL="H100 SXM"; P_SXM=1; P_LINKS=18; P_LINE=450; P_SWITCH=4
-      P_BUS=340; P_BUS_FAIL=185; P_BUS_REF="about 370 GB/s in ring, about 480 with NVLink SHARP" ;;
+      P_BUS=340; P_BUS_FAIL=185; P_BUS_REF="478.5 GB/s measured on 8x H100 SXM (2026-10-24), about 370 in ring without NVLink SHARP" ;;
     *h200*) P_LABEL="H200 SXM"; P_SXM=1; P_LINKS=18; P_LINE=450; P_SWITCH=4
       P_BUS=340; P_BUS_FAIL=185; P_BUS_REF="about 370 GB/s in ring, about 480 with NVLink SHARP" ;;
     *a100*sxm*) P_LABEL="A100 SXM"; P_SXM=1; P_LINKS=12; P_LINE=300; P_SWITCH=6
@@ -553,9 +556,9 @@ p2p_test() {
   if [ -n "$P_LINE" ]; then
     floor=$(fmul "$P_LINE" "$P2P_FAIL"); low=$(fmul "$P_LINE" "$P2P_WARN")
     if ! fge "$min" "$floor"; then st=FAIL; s="$s; under $floor GB/s (25% of the $P_LINE GB/s line rate of $P_LABEL): not on NVLink"
-    elif ! fge "$med" "$low"; then st=$(worse "$st" WARN); s="$s; median under $low GB/s (60% of the $P_LABEL line rate)"; fi
+    elif ! fge "$med" "$low"; then st=$(worse "$st" WARN); s="$s; median under $low GB/s ($(fmul 100 "$P2P_WARN")% of the $P_LABEL line rate)"; fi
   elif ! fge "$min" "$(fmul "$med" "$P2P_FAIL")"; then st=FAIL; s="$s; a pair under 25% of the median"; fi
-  if [ "$st" = PASS ] && ! fge "$min" "$(fmul "$med" "$P2P_SPREAD")"; then st=WARN; s="$s; a pair under 80% of the median"; fi
+  if [ "$st" = PASS ] && ! fge "$min" "$(fmul "$med" "$P2P_SPREAD")"; then st=WARN; s="$s; a pair under $(fmul 100 "$P2P_SPREAD")% of the median"; fi
   if [ "$st" = PASS ] && [ -n "$floor" ]; then s="$s (FAIL under $floor, WARN under $low: $P_LABEL line rate $P_LINE GB/s)"; fi
   add 2 "P2P copies" "$st" "$s" "$data"
 }

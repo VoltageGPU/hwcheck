@@ -3,3 +3,5 @@
 tests/fake/* text eol=lf
 # Fixtures are raw nvidia-smi outputs (tabs, escape codes): their bytes stay as they are.
 tests/fixtures/** -text
+# The real reports keep the bytes the tool wrote: their SHA-256 is published next to them.
+examples/*-acceptance.* -text

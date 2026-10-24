@@ -36,7 +36,8 @@ p2p() {  # p2p FILE VALUE_FOR_PAIR_FUNCTION: writes a p2p.py output for 8 GPUs
   awk -v f="$2" 'BEGIN {
     n = 8; min = 1e9
     for (i = 0; i < n; i++) for (j = 0; j < n; j++) if (i != j) {
-      v = (f == "sick" && (i == 7 || j == 7)) ? 38 + (i + j) % 3 : (f == "pcie" ? 24 + (int(i / 4) == int(j / 4) ? 2 : 0) : 389 + (i * 3 + j) % 5)
+      v = (f == "sick" && (i == 7 || j == 7)) ? 38 + (i + j) % 3 : (f == "pcie" ? 24 + (int(i / 4) == int(j / 4) ? 2 : 0) : (f == "slow" ? 328 : 389) + (i * 3 + j) % 5)
+      if (f == "onepair" && i == 0 && j == 5) v = 340
       m[i, j] = v; all[++k] = v; if (v < min) { min = v; mi = i; mj = j }
     }
     for (a = 2; a <= k; a++) { t = all[a]; for (b = a - 1; b >= 1 && all[b] > t; b--) all[b + 1] = all[b]; all[b + 1] = t }
@@ -50,6 +51,10 @@ p2p() {  # p2p FILE VALUE_FOR_PAIR_FUNCTION: writes a p2p.py output for 8 GPUs
   }' > "$1"
 }
 p2p "$h/py/p2p.out" healthy
+# Two slow variants for the P2P thresholds measured on a real 8x H100 SXM on 24/10/2026 (FAKE_P2P):
+# every pair at about 330 GB/s (73% of the line rate), and one pair at 340 GB/s (87% of the median).
+p2p "$h/py/p2p-slow.out" slow
+p2p "$h/py/p2p-onepair.out" onepair
 printf 'ALGBW=273.3\nBUSBW=478.3\nTIME_US=15715\nWRONG=0\nRANKS=8\n' > "$h/py/nccl.out"
 printf 'TFLOPS=652.4\nMISMATCH=0\nFINITE=1\nCHECKSUM=-1234567\nDTYPE=bfloat16\n' > "$h/py/burn.out"
 

@@ -5,10 +5,11 @@
 py=${FAKE_DIR:?}/py
 busy() { : > "$FAKE_STATE/busy.$$"; sleep "$1"; rm -f "$FAKE_STATE/busy.$$"; }
 # FAKE_CUDA_FAIL=<message>: the P2P and NCCL scripts fail with that CUDA error.
+# FAKE_P2P=<file>: the P2P script prints that file instead of $FAKE_DIR/py/p2p.out.
 cuda_fail() { [ -n "${FAKE_CUDA_FAIL:-}" ] && { echo "RuntimeError: $FAKE_CUDA_FAIL" >&2; exit 1; }; }
 case "${1##*/}" in
   probe.py) [ -f "$py/probe.out" ] || { echo "ModuleNotFoundError: No module named 'torch'" >&2; exit 1; }; cat "$py/probe.out" ;;
-  p2p.py) cuda_fail; busy 2; cat "$py/p2p.out" ;;
+  p2p.py) cuda_fail; busy 2; cat "${FAKE_P2P:-$py/p2p.out}" ;;
   nccl.py) cuda_fail; busy 2; cat "$py/nccl.out" ;;
   burn.py)
     busy "${2:-10}"

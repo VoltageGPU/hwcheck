@@ -1,0 +1,15 @@
+H2D=55.5,53.2,55.5,53.1,53.9,54.3,53.9,55.3
+P2P_MIN=387
+P2P_MIN_PAIR=0>2
+P2P_MEDIAN=389
+P2P_NOPEER=
+P2P_BAD=
+ROW=0 - 389 387 390 388 389 388 388
+ROW=1 390 - 389 390 388 389 388 388
+ROW=2 389 389 - 387 388 389 389 389
+ROW=3 388 389 388 - 388 388 388 388
+ROW=4 390 387 390 389 - 388 390 390
+ROW=5 389 389 390 389 387 - 391 387
+ROW=6 390 387 390 389 391 391 - 390
+ROW=7 389 391 388 389 390 391 389 -
+JSON={"gb_per_s": [[null, 388.7, 386.8, 389.9, 387.9, 388.6, 387.9, 388.4], [390.1, null, 388.8, 389.6, 388.3, 388.6, 388.1, 388.3], [389.3, 389.4, null, 386.9, 387.8, 388.6, 388.7, 389.2], [387.9, 388.8, 388.5, null, 388.4, 387.9, 387.7, 387.5], [389.5, 387.3, 390.5, 388.6, null, 388.3, 389.7, 389.8], [389.1, 388.6, 390.1, 389.2, 387.4, null, 390.6, 387.0], [390.2, 387.4, 390.0, 389.1, 391.3, 391.4, null, 390.2], [389.0, 390.7, 388.5, 389.3, 389.8, 391.3, 388.8, null]], "peer_access": [[true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true], [true, true, true, true, true, true, true, true]], "host_to_gpu_gb_per_s": [55.5, 53.2, 55.5, 53.1, 53.9, 54.3, 53.9, 55.3], "bytes": 268435456, "iterations": 20, "corrupted_pairs": []}

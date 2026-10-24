@@ -1,0 +1,87 @@
+VoltageGPU hwcheck acceptance test 1.1 (read-only, nothing about this machine is sent anywhere)
+  started 2026-10-24 15:46:57 UTC, finished 2026-10-24 15:53:54 UTC · bm-187f9222
+  8x NVIDIA H100 80GB HBM3 · driver 595.112.07 · CUDA 13.2 · virtualization: none
+  PyTorch 2.14.1+cu130 (CUDA 13.0, installed for this run, cu130) · NCCL 2.30.7 · Ubuntu 24.04.5 LTS · kernel 6.8.0-139-generic
+
+── 1 Topology ──
+nvidia-smi topo -m:
+        GPU0    GPU1    GPU2    GPU3    GPU4    GPU5    GPU6    GPU7    CPU Affinity    NUMA Affinity   GPU NUMA ID
+    GPU0         X      NV18    NV18    NV18    NV18    NV18    NV18    NV18    0-23,96-119     0               N/A
+    GPU1        NV18     X      NV18    NV18    NV18    NV18    NV18    NV18    0-23,96-119     0               N/A
+    GPU2        NV18    NV18     X      NV18    NV18    NV18    NV18    NV18    0-23,96-119     0               N/A
+    GPU3        NV18    NV18    NV18     X      NV18    NV18    NV18    NV18    24-47,120-143   1               N/A
+    GPU4        NV18    NV18    NV18    NV18     X      NV18    NV18    NV18    48-71,144-167   2               N/A
+    GPU5        NV18    NV18    NV18    NV18    NV18     X      NV18    NV18    48-71,144-167   2               N/A
+    GPU6        NV18    NV18    NV18    NV18    NV18    NV18     X      NV18    48-71,144-167   2               N/A
+    GPU7        NV18    NV18    NV18    NV18    NV18    NV18    NV18     X      72-95,168-191   3               N/A
+lspci -nn, NVIDIA devices:
+    05:00.0 Bridge [0680]: NVIDIA Corporation GH100 [H100 NVSwitch] [10de:22a3] (rev a1)
+    06:00.0 Bridge [0680]: NVIDIA Corporation GH100 [H100 NVSwitch] [10de:22a3] (rev a1)
+    07:00.0 Bridge [0680]: NVIDIA Corporation GH100 [H100 NVSwitch] [10de:22a3] (rev a1)
+    08:00.0 Bridge [0680]: NVIDIA Corporation GH100 [H100 NVSwitch] [10de:22a3] (rev a1)
+    18:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    2a:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    3a:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    5d:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    9a:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    ab:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    ba:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+    db:00.0 3D controller [0302]: NVIDIA Corporation GH100 [H100 SXM5 80GB] [10de:2330] (rev a1)
+PCIe links, best generation and width seen:
+    GPU 0: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 55.5 GB/s
+    GPU 1: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 53.2 GB/s
+    GPU 2: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 55.5 GB/s
+    GPU 3: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 53.1 GB/s
+    GPU 4: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 53.9 GB/s
+    GPU 5: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 54.3 GB/s
+    GPU 6: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 53.9 GB/s
+    GPU 7: Gen5 x16 seen (Gen5 x16 possible), under load, host-to-GPU copies 55.3 GB/s
+
+── 2 P2P ──
+GPU-to-GPU copies in GB/s (row = source GPU, column = destination GPU):
+    GPU0        -    389    387    390    388    389    388    388
+    GPU1      390      -    389    390    388    389    388    388
+    GPU2      389    389      -    387    388    389    389    389
+    GPU3      388    389    389      -    388    388    388    388
+    GPU4      389    387    391    389      -    388    390    390
+    GPU5      389    389    390    389    387      -    391    387
+    GPU6      390    387    390    389    391    391      -    390
+    GPU7      389    391    389    389    390    391    389      -
+
+── 3 NCCL ──
+all-reduce of 4 GiB per GPU, 20 iterations: algorithm bandwidth 273.4 GB/s, 15709 us per all-reduce
+
+── 4 Load ──
+    GPU  samples  busy  max C  HBM C  SM MHz   max W  TFLOPS  slowdown samples: power cap / thermal / hw / brake
+    0         60  100%     58     49    1365     702   687.0  57 / 0 / 0 / 0
+    1         60  100%     65     56    1350     701   676.3  57 / 0 / 0 / 0
+    2         60  100%     69     56    1335     700   669.2  57 / 0 / 0 / 0
+    3         60  100%     58     49    1372     701   684.5  57 / 0 / 0 / 0
+    4         60  100%     62     53    1380     701   684.6  57 / 0 / 0 / 0
+    5         60  100%     65     59    1380     701   688.7  57 / 0 / 0 / 0
+    6         60  100%     65     55    1365     702   683.3  57 / 0 / 0 / 0
+    7         60  100%     60     51    1380     701   682.9  58 / 0 / 0 / 0
+
+── 6 Hygiene ──
+    /home/ubuntu/.ssh/authorized_keys: 1 key(s)
+      256 SHA256:kOm+r2335J+0FYGgY4ZGvVuKSZerAadVKraLDUe1FtY (ED25519)
+
+  1 Topology  GPUs                PASS  8x NVIDIA H100 80GB HBM3
+              NVLink mesh         PASS  56/56 GPU pairs on NV18 (NV18 expected on H100 SXM)
+              NVSwitch            PASS  4 NVSwitch chips visible (4 on an 8-GPU H100 SXM board)
+              Fabric state        PASS  Completed / Success on 8/8 GPUs
+              PCIe links          PASS  Gen5 x16 on 8/8 GPUs under load, host-to-GPU copies 53.1 to 55.5 GB/s
+  2 P2P       CUDA init           PASS  8/8 GPUs in PyTorch 2.14.1+cu130 (installed for this run, cu130)
+              P2P copies          PASS  slowest pair 387 GB/s (GPU 0>2), median 389 GB/s (FAIL under 112, WARN under 270: H100 SXM line rate 450 GB/s)
+  3 NCCL      NCCL all-reduce     PASS  bus bandwidth 478.5 GB/s on 8 GPUs (4 GiB, NCCL 2.30.7); H100 SXM: about 370 GB/s in ring, about 480 with NVLink SHARP, PASS from 340
+  4 Load      Throughput          PASS  8/8 GPUs ran it, median 684 TFLOPS (bfloat16), slowest GPU 2 at 669
+              Thermal / power     PASS  max 69 C (GPU 2), no thermal or hardware slowdown; at the power cap in 95% of the samples (normal under full load)
+              Clocks              PASS  median SM clock 1368 MHz, every GPU between 1335 and 1380 MHz, at least 90% busy
+  5 Errors    ECC / memory        PASS  ECC on 8/8 GPUs, no uncorrected error, nothing pending, 0 corrected since the driver loaded
+              Kernel log (Xid)    PASS  no Xid during the test, read with journalctl
+  6 Hygiene   Previous tenant     PASS  nothing found in the home directories, /tmp, /var/tmp and /workspace; not readable: /root (run as root to include it)
+              SSH keys            PASS  1 key can log in (ubuntu: 1)
+              GPUs idle at start  PASS  no compute process, no GPU memory in use
+              Virtualization      PASS  none detected (systemd-detect-virt): bare metal, as listed
+
+RESULT: PASS

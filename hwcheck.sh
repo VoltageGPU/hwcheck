@@ -12,7 +12,7 @@ set -u
 
 # ── --acceptance: only the acceptance.sh whose SHA-256 is pinned here runs ──
 ACCEPTANCE_URL="https://voltagegpu.com/hwcheck-acceptance.sh"
-ACCEPTANCE_SHA256="ae76254f620b5a9d764e935933cdc216e7c4a2eabb1d2bfc34874a3aa412cfa7"
+ACCEPTANCE_SHA256="6bce8305ebf6903eb3c46b2a12423019817d81e8182542c8ef9fa1a3544f5e9d"
 if [ "${1:-}" = "--acceptance" ]; then
   shift
   sha() { sha256sum "$1" 2>/dev/null | awk '{ print $1 }'; }

@@ -115,6 +115,20 @@ check "sick: history, model file, old /tmp file listed" bash -c "grep -q 'histor
 check "sick: two SSH keys" has sick "2 keys can log in \(root: 2\)"
 check "sick: 40961 MiB in use on GPU 3" has sick "memory used on GPU 3 40961 MiB"
 
+echo "acceptance.sh, 8x H100 SXM with slow P2P copies (thresholds measured on 8x H100 SXM, 2026-10-24)"
+run slowp2p h100-8x fs-clean "FAKE_P2P=$HERE/fixtures/h100-8x/py/p2p-slow.out" -- --quick --gpus 8 --bare-metal
+common slowp2p WARN 1
+check "slowp2p: P2P copies WARN" line slowp2p "P2P copies" WARN
+check "slowp2p: median under 75% of the line rate" has slowp2p "median under 338 GB/s \(75% of the H100 SXM line rate\)"
+run onepair h100-8x fs-clean "FAKE_P2P=$HERE/fixtures/h100-8x/py/p2p-onepair.out" -- --quick --gpus 8 --bare-metal
+common onepair WARN 1
+check "onepair: P2P copies WARN" line onepair "P2P copies" WARN
+check "onepair: one pair under 90% of the median" has onepair "slowest pair 340 GB/s \(GPU 0>5\), median 391 GB/s; a pair under 90% of the median"
+run measured h100-8x fs-clean "FAKE_P2P=$HERE/fixtures/h100-8x/py/p2p-measured-2026-10-24.out" -- --quick --gpus 8 --bare-metal
+common measured PASS 0
+check "measured: the real 8x H100 SXM copies of 2026-10-24 pass the new thresholds" has measured "P2P copies +PASS +slowest pair 387 GB/s \(GPU 0>2\), median 389 GB/s \(FAIL under 112, WARN under 338"
+check "measured: their host-to-GPU copies pass too" has measured "PCIe links +PASS .*host-to-GPU copies 53.1 to 55.5 GB/s"
+
 echo "acceptance.sh, 8x PCIe GPUs without NVLink, --quick"
 run pcie pcie-8x fs-clean FAKE_VIRT=kvm -- --quick
 common pcie PASS 0

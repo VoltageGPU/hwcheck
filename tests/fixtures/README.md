@@ -9,6 +9,8 @@ What the fake `nvidia-smi`, `lspci`, `dmesg` and PyTorch of `tests/fake/` replay
 | `rtx3060ti-1x/L.txt` | real, same machine, UUID zeroed |
 | `rtx3060ti-1x/gpus.csv` | real values of `nvidia-smi --query-gpu` on that machine, put in one file by `build.sh` (UUID zeroed) |
 | `h100-8x/topo.txt`, `h100-8x/lspci.txt` | real: `nvidia-smi topo -m` and `lspci -nn` NVIDIA lines of an 8x H100 SXM virtual machine, 10 September 2026 (4 NVSwitch visible) |
+| `h100-8x/py/p2p-measured-2026-10-24.out` | real values: the P2P matrix and host-to-GPU copies of the acceptance test run on a production 8x H100 SXM bare metal node on 24 October 2026 (`examples/h100-8x-acceptance.json`), printed again in `p2p.py`'s format (the report keeps 0.1 GB/s) |
+| `h100-8x/py/p2p-slow.out`, `p2p-onepair.out` | constructed by `build.sh`: every pair at about 330 GB/s (73% of the line rate), and one pair at 340 GB/s (87% of the median); both WARN since the thresholds measured on 24 October 2026 |
 | `h100-8x/*` (the rest) | constructed: a healthy node; driver 580.173.02 and CUDA 13.0 as seen on a real H100 on 17 October 2026 |
 | `h100-8x-sick/*` | constructed from `h100-8x`: GPU 7 off NVLink (SYS), one NVSwitch missing, GPU 2 at x8, GPU 5 at Gen4 and hot with hardware thermal slowdown, GPU 0 at a low clock, GPU 4 capped at 500 W and at half throughput, GPU 6 with uncorrected ECC errors and changing results, GPU 1 with a pending row remap, GPU 7 fabric in progress, a process on GPU 3, Xid 79 during the test |
 | `pcie-8x/*` | constructed: 8 PCIe GPUs on two sockets, no NVLink |
