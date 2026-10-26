@@ -1,0 +1,4 @@
+# shellcheck 0.9.0 (Ubuntu 24.04, used by CI) reports SC2317 "unreachable" on functions called only
+# by a trap (cleanup in acceptance.sh); newer releases do not. acceptance.sh is not edited for this:
+# its SHA-256 is pinned in hwcheck.sh and on voltagegpu.com.
+disable=SC2317
